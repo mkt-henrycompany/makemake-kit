@@ -463,9 +463,26 @@
   <div class="legend-item" style="margin-left:auto;color:var(--muted);font-size:11px;">💡 Clique nos nomes das influenciadoras para editar · Dados salvos automaticamente no navegador</div>
 </footer>
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// 🔴 COLE AQUI O SEU firebaseConfig DO PASSO 12
+const firebaseConfig = {
+  apiKey: "AIzaSyBM84JcuAhJ0cczyWCPRdbP3s-6P-sXXik",
+  authDomain: "makemake-kit.firebaseapp.com",
+  projectId: "makemake-kit",
+  storageBucket: "makemake-kit.firebasestorage.app",
+  messagingSenderId: "361452700245",
+  appId: "1:361452700245:web:c58e07e2b586b863388adc"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const DOC_REF = doc(db, "makemake", "kit");
+
 const INFLUENCIADORAS_COUNT = 20;
-const STORAGE_KEY = 'makemake_kit_v1';
 
 const PRODUTOS = [
   { cat: 'Compactos', nome: 'Pó Compacto MK 01', ean: '7 898697 028512' },
@@ -516,13 +533,13 @@ const CAT_BADGE = {
   'Líquidos':  'badge-liquido',
 };
 
-// State
-let state = load();
-let activeFilter = 'all'; // 'all' or inf index (0-based)
+let state = defaultState();
+let activeFilter = 'all';
+let isSyncing = false; // evita loop de escrita
 
 function defaultState() {
   const names = Array.from({length: INFLUENCIADORAS_COUNT}, (_, i) => `Inf. ${i+1}`);
-  const checks = {}; // checks[prodIdx][infIdx] = bool
+  const checks = {};
   PRODUTOS.forEach((_, pi) => {
     checks[pi] = {};
     for (let ii = 0; ii < INFLUENCIADORAS_COUNT; ii++) checks[pi][ii] = false;
@@ -530,34 +547,38 @@ function defaultState() {
   return { names, checks };
 }
 
-function load() {
+// 💾 SALVA no Firestore (em vez de localStorage)
+async function save() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      // Merge in case products changed
-      const def = defaultState();
-      def.names = parsed.names || def.names;
-      PRODUTOS.forEach((_, pi) => {
-        if (parsed.checks && parsed.checks[pi]) {
-          Object.assign(def.checks[pi], parsed.checks[pi]);
-        }
-      });
-      return def;
-    }
-  } catch(e) {}
-  return defaultState();
+    await setDoc(DOC_REF, JSON.parse(JSON.stringify(state)));
+  } catch(e) {
+    console.error("Erro ao salvar:", e);
+  }
 }
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
+// 🔴 ESCUTA mudanças em tempo real de qualquer celular
+onSnapshot(DOC_REF, (snap) => {
+  if (!snap.exists()) return;
+  const data = snap.data();
+  if (!data) return;
+  isSyncing = true;
+  state.names = data.names || state.names;
+  PRODUTOS.forEach((_, pi) => {
+    if (data.checks && data.checks[pi]) {
+      Object.assign(state.checks[pi], data.checks[pi]);
+    }
+  });
+  renderTable();
+  buildTabs();
+  updateStats();
+  isSyncing = false;
+});
 
 function cellId(pi, ii) { return `c_${pi}_${ii}`; }
 
 function toggle(pi, ii) {
   state.checks[pi][ii] = !state.checks[pi][ii];
-  save();
+  save(); // salva no Firebase
   refreshCell(pi, ii);
   updateStats();
 }
@@ -568,21 +589,18 @@ function refreshCell(pi, ii) {
   const checked = state.checks[pi][ii];
   el.className = 'check-box' + (checked ? ' checked' : '');
   el.textContent = checked ? '✓' : '';
-  // update row total
   const rowTotal = PRODUTOS.map((_, i) => state.checks[pi][i]).filter(Boolean).length;
   const rt = document.getElementById(`rt_${pi}`);
   if (rt) {
     rt.textContent = rowTotal > 0 ? rowTotal : '—';
     rt.className = 'td-total' + (rowTotal > 0 ? ' has-checks' : '');
   }
-  // update col total
   const colTotal = PRODUTOS.map((_, pj) => state.checks[pj][ii]).filter(Boolean).length;
   const ct = document.getElementById(`ct_${ii}`);
   if (ct) {
     ct.textContent = colTotal > 0 ? colTotal : '—';
     ct.className = 'td-total' + (colTotal > 0 ? ' has-checks' : '');
   }
-  // progress
   const prog = document.getElementById(`prog_${ii}`);
   if (prog) prog.style.width = Math.round(colTotal / PRODUTOS.length * 100) + '%';
 }
@@ -651,12 +669,9 @@ function renderTable() {
   const cats = [...new Set(PRODUTOS.map(p => p.cat))];
 
   let html = `<table>`;
-
-  // Header
   html += `<thead><tr>
     <th class="th-produto">Produto</th>
     <th class="th-ean">EAN</th>`;
-
   infs.forEach(ii => {
     html += `<th class="th-inf">
       <input class="inf-edit" id="name_${ii}" value="${escHtml(state.names[ii])}"
@@ -668,10 +683,8 @@ function renderTable() {
       </div>
     </th>`;
   });
-
   html += `<th style="min-width:40px;width:40px;font-size:9px;">Total<br>infs</th></tr>`;
 
-  // Col totals row
   html += `<tr class="kit-summary-row"><td colspan="2" style="text-align:right;padding-right:14px;">Itens no kit →</td>`;
   infs.forEach(ii => {
     const col = PRODUTOS.filter((_, pi) => state.checks[pi][ii]).length;
@@ -709,7 +722,6 @@ function renderTable() {
   html += `</tbody></table>`;
   main.innerHTML = html;
 
-  // Update progress bars
   infs.forEach(ii => {
     const col = PRODUTOS.filter((_, pi) => state.checks[pi][ii]).length;
     const prog = document.getElementById(`prog_${ii}`);
@@ -721,7 +733,6 @@ function renameInf(ii, val) {
   const name = val.trim() || `Inf. ${ii+1}`;
   state.names[ii] = name;
   save();
-  // update tab label
   const tabs = document.getElementById('inf-tabs');
   const tab = tabs.querySelector(`[data-inf="${ii}"]`);
   if (tab) tab.textContent = name;
@@ -730,6 +741,13 @@ function renameInf(ii, val) {
 function escHtml(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Expõe funções para o HTML (necessário com type="module")
+window.toggle = toggle;
+window.setFilter = setFilter;
+window.marcarTodasAtual = marcarTodasAtual;
+window.resetarAtual = resetarAtual;
+window.renameInf = renameInf;
 
 // Init
 buildTabs();
