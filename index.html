@@ -419,7 +419,18 @@
     font-size: 10px;
     letter-spacing: 1px;
     text-transform: uppercase;
+  .btn-pdf {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid #1e2a40;
+    background: transparent;
+    color: #6b9bc4;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    transition: all 0.15s;
   }
+  .btn-pdf:hover { background: #1e2a40; }
 </style>
 </head>
 <body>
@@ -452,7 +463,7 @@
   </div>
   <button class="btn-all" onclick="marcarTodasAtual()">✓ Marcar todas visíveis</button>
   <button class="btn-reset" onclick="resetarAtual()">✕ Limpar visíveis</button>
-</div>
+<button class="btn-pdf" onclick="gerarPDF()">⬇ Gerar PDF</button>
 
 <div class="main" id="main-content">
 </div>
@@ -753,6 +764,84 @@ window.renameInf = renameInf;
 buildTabs();
 renderTable();
 updateStats();
+  function gerarPDF() {
+  const cats = [...new Set(PRODUTOS.map(p => p.cat))];
+  const infs = Array.from({length: INFLUENCIADORAS_COUNT}, (_, i) => i);
+
+  let html = `
+  <html><head>
+  <meta charset="UTF-8">
+  <style>
+    body { font-family: Arial, sans-serif; font-size: 11px; color: #222; padding: 24px; }
+    h1 { font-size: 22px; margin-bottom: 4px; }
+    h2 { font-size: 13px; margin: 18px 0 6px; color: #555; text-transform: uppercase; letter-spacing: 1px; }
+    .gerado { font-size: 10px; color: #999; margin-bottom: 20px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 20px; page-break-inside: auto; }
+    th { background: #f0f0f0; font-size: 9px; text-transform: uppercase; padding: 5px 4px; border: 1px solid #ccc; text-align: center; }
+    th.th-prod { text-align: left; min-width: 160px; }
+    td { padding: 4px 4px; border: 1px solid #e0e0e0; text-align: center; font-size: 10px; }
+    td.td-prod { text-align: left; font-weight: 600; }
+    td.checked { background: #d4845a; color: #fff; font-weight: bold; }
+    td.empty { color: #ccc; }
+    .totais { background: #fafafa; font-weight: bold; }
+    .resumo { margin-bottom: 24px; padding: 12px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; }
+    .resumo h3 { margin: 0 0 8px; font-size: 13px; }
+    .resumo p { margin: 2px 0; }
+  </style>
+  </head><body>
+  <h1>Make Make — Controle de Kits Influenciadoras</h1>
+  <p class="gerado">Gerado em: ${new Date().toLocaleString('pt-BR')}</p>`;
+
+  // Resumo geral
+  let totalMarcacoes = 0;
+  const resumoInfs = infs.map(ii => {
+    const total = PRODUTOS.filter((_, pi) => state.checks[pi][ii]).length;
+    totalMarcacoes += total;
+    return { nome: state.names[ii], total };
+  }).filter(x => x.total > 0);
+
+  html += `<div class="resumo">
+    <h3>📊 Resumo Geral</h3>
+    <p><strong>Total de marcações:</strong> ${totalMarcacoes}</p>
+    <p><strong>Influenciadoras com itens:</strong> ${resumoInfs.length} de ${INFLUENCIADORAS_COUNT}</p>
+    <p><strong>Influenciadoras:</strong> ${resumoInfs.map(x => `${x.nome} (${x.total} itens)`).join(' · ')}</p>
+  </div>`;
+
+  // Tabela por categoria
+  cats.forEach(cat => {
+    const prodsCat = PRODUTOS.map((p, pi) => ({...p, pi})).filter(p => p.cat === cat);
+    html += `<h2>${cat}</h2><table>`;
+    html += `<thead><tr><th class="th-prod">Produto</th>`;
+    infs.forEach(ii => { html += `<th style="max-width:36px;word-break:break-all;">${escHtml(state.names[ii])}</th>`; });
+    html += `<th>Total</th></tr></thead><tbody>`;
+
+    prodsCat.forEach(p => {
+      const rowTotal = infs.filter(ii => state.checks[p.pi][ii]).length;
+      html += `<tr><td class="td-prod">${escHtml(p.nome)}</td>`;
+      infs.forEach(ii => {
+        const ok = state.checks[p.pi][ii];
+        html += `<td class="${ok ? 'checked' : 'empty'}">${ok ? '✓' : '·'}</td>`;
+      });
+      html += `<td style="font-weight:bold;color:${rowTotal>0?'#d4845a':'#aaa'}">${rowTotal || '—'}</td></tr>`;
+    });
+
+    // Linha de totais por influenciadora
+    html += `<tr class="totais"><td class="td-prod">Total itens por inf.</td>`;
+    infs.forEach(ii => {
+      const col = prodsCat.filter(p => state.checks[p.pi][ii]).length;
+      html += `<td>${col || '—'}</td>`;
+    });
+    html += `<td></td></tr>`;
+    html += `</tbody></table>`;
+  });
+
+  html += `</body></html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+  win.print(); // abre direto o menu de impressão/salvar como PDF
+}
 </script>
 </body>
 </html>
