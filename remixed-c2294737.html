@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kit Influenciadoras — Make Make</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --accent: #e8c4b8;
+    --accent2: #c9956e;
+    --checked: #d4845a;
+    --text: #f0ece8;
+    --muted: #7a7068;
+    --tag-compact: #3d2a35;
+    --tag-solto: #1e3040;
+    --tag-liquido: #1a3030;
+    --tag-compact-t: #c98fa8;
+    --tag-solto-t: #7ab8d4;
+    --tag-liquido-t: #6bc4a8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+  }
+
+  header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    gap: 20px;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-area h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .logo-area p {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  .header-stats {
+    margin-left: auto;
+    display: flex;
+    gap: 24px;
+  }
+
+  .stat {
+    text-align: center;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    color: var(--accent2);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  .controls {
+    padding: 14px 32px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .inf-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+  }
+
+  .inf-tabs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .inf-tab {
+    padding: 5px 13px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+
+  .inf-tab:hover { border-color: var(--accent2); color: var(--accent2); }
+  .inf-tab.active { background: var(--checked); border-color: var(--checked); color: #fff; font-weight: 600; }
+
+  .btn-reset {
+    margin-left: auto;
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid #3a2020;
+    background: transparent;
+    color: #c06060;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .btn-reset:hover { background: #3a2020; }
+
+  .btn-all {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: 1px solid #1e3020;
+    background: transparent;
+    color: #6bc480;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .btn-all:hover { background: #1e3020; }
+
+  .main {
+    padding: 24px 32px;
+    overflow-x: auto;
+  }
+
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+    margin-top: 28px;
+  }
+
+  .section-title:first-child { margin-top: 0; }
+
+  .section-badge {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .badge-compact { background: var(--tag-compact); color: var(--tag-compact-t); }
+  .badge-solto   { background: var(--tag-solto);   color: var(--tag-solto-t); }
+  .badge-liquido { background: var(--tag-liquido);  color: var(--tag-liquido-t); }
+
+  .section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+    margin-bottom: 8px;
+  }
+
+  th {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    padding: 8px 10px;
+    text-align: center;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+  }
+
+  th.th-produto {
+    text-align: left;
+    min-width: 200px;
+    width: 200px;
+  }
+
+  th.th-ean {
+    min-width: 130px;
+    width: 130px;
+    text-align: left;
+  }
+
+  td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  tr:hover td { background: var(--surface2); }
+
+  td.td-produto {
+    font-weight: 500;
+    color: var(--text);
+    font-size: 12px;
+  }
+
+  td.td-ean {
+    font-size: 11px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  td.td-check {
+    text-align: center;
+    padding: 4px 6px;
+  }
+
+  .check-box {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.12s;
+    font-size: 14px;
+    color: transparent;
+  }
+
+  .check-box:hover {
+    border-color: var(--accent2);
+    background: rgba(201, 149, 110, 0.1);
+  }
+
+  .check-box.checked {
+    background: var(--checked);
+    border-color: var(--checked);
+    color: #fff;
+  }
+
+  td.td-total {
+    text-align: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  td.td-total.has-checks {
+    color: var(--accent2);
+  }
+
+  .row-total-bar {
+    display: inline-block;
+    margin-left: 4px;
+    width: 3px;
+    height: 0;
+    background: var(--checked);
+    border-radius: 2px;
+    vertical-align: middle;
+    transition: height 0.2s;
+  }
+
+  th.th-inf {
+    min-width: 38px;
+    width: 38px;
+    font-size: 9px;
+  }
+
+  .inf-name-header {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    padding: 8px 0;
+    display: inline-block;
+    max-height: 90px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .progress-bar-wrap {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--checked);
+    border-radius: 2px;
+    transition: width 0.3s;
+  }
+
+  .col-progress {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: center;
+    padding-bottom: 4px;
+  }
+
+  .inf-edit {
+    background: none;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: text;
+    width: 100%;
+    text-align: center;
+    padding: 0;
+  }
+
+  .inf-edit:focus {
+    outline: 1px solid var(--accent2);
+    border-radius: 3px;
+    color: var(--accent);
+  }
+
+  .kit-summary-row td {
+    background: var(--surface2);
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  footer {
+    padding: 20px 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+
+  .kit-counter-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 32px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .kit-pill {
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .kit-pill .count {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    color: var(--accent2);
+    line-height: 1;
+  }
+
+  .pill-label {
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-area">
+    <h1>Make Make</h1>
+    <p>Controle de Kits — Influenciadoras</p>
+  </div>
+  <div class="header-stats">
+    <div class="stat">
+      <div class="stat-num" id="stat-marcacoes">0</div>
+      <div class="stat-label">Marcações</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-kits">0</div>
+      <div class="stat-label">Kits com itens</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">38</div>
+      <div class="stat-label">Produtos</div>
+    </div>
+  </div>
+</header>
+
+<div class="controls">
+  <span class="inf-label">Influenciadora:</span>
+  <div class="inf-tabs" id="inf-tabs">
+    <button class="inf-tab active" data-inf="all">Todas</button>
+  </div>
+  <button class="btn-all" onclick="marcarTodasAtual()">✓ Marcar todas visíveis</button>
+  <button class="btn-reset" onclick="resetarAtual()">✕ Limpar visíveis</button>
+</div>
+
+<div class="main" id="main-content">
+</div>
+
+<footer>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--checked)"></div> Incluído no kit</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--border)"></div> Não incluído</div>
+  <div class="legend-item" style="margin-left:auto;color:var(--muted);font-size:11px;">💡 Clique nos nomes das influenciadoras para editar · Dados salvos automaticamente no navegador</div>
+</footer>
+
+<script>
+const INFLUENCIADORAS_COUNT = 20;
+const STORAGE_KEY = 'makemake_kit_v1';
+
+const PRODUTOS = [
+  { cat: 'Compactos', nome: 'Pó Compacto MK 01', ean: '7 898697 028512' },
+  { cat: 'Compactos', nome: 'Pó Compacto MK 02', ean: '7 898697 028505' },
+  { cat: 'Compactos', nome: 'Pó Compacto MK 03', ean: '7 898697 028529' },
+  { cat: 'Compactos', nome: 'Contorno CT 01 MK', ean: '7 898697 028536' },
+  { cat: 'Compactos', nome: 'Contorno CT 02 MK', ean: '7 898697 028543' },
+  { cat: 'Compactos', nome: 'Contorno CT 03 MK', ean: '7 898697 028550' },
+  { cat: 'Compactos', nome: 'Blush Rose',         ean: '7 898697 028628' },
+  { cat: 'Compactos', nome: 'Blush Sunset',       ean: '7 898697 028635' },
+  { cat: 'Compactos', nome: 'Blush Peach',        ean: '7 898697 028611' },
+  { cat: 'Soltos',    nome: 'Pó Solto Cacau',      ean: '7 898697 028581' },
+  { cat: 'Soltos',    nome: 'Pó Solto Banana',     ean: '7 898697 028574' },
+  { cat: 'Soltos',    nome: 'Pó Solto Translúcido',ean: '7 898697 028567' },
+  { cat: 'Soltos',    nome: 'Iluminador 110',      ean: '7 898697 028582' },
+  { cat: 'Soltos',    nome: 'Iluminador 111',      ean: '7 898697 028499' },
+  { cat: 'Soltos',    nome: 'Iluminador 112',      ean: '7 898697 028468' },
+  { cat: 'Líquidos',  nome: 'Delineador LC Black', ean: '7 898697 028475' },
+  { cat: 'Líquidos',  nome: 'Rímel Preto',         ean: '7 898697 028352' },
+  { cat: 'Líquidos',  nome: 'Rímel Incolor',       ean: '7 898697 028345' },
+  { cat: 'Líquidos',  nome: 'Batom Liq. Wine It',  ean: '7 898697 028413' },
+  { cat: 'Líquidos',  nome: 'Batom Liq. Red Vibes',ean: '7 898697 028437' },
+  { cat: 'Líquidos',  nome: 'Batom Liq. Nude Me',  ean: '7 898697 028444' },
+  { cat: 'Líquidos',  nome: 'Batom Liq. Deep Love',ean: '7 898697 028420' },
+  { cat: 'Líquidos',  nome: 'Batom Liq. Soft Kiss',ean: '7 898697 028451' },
+  { cat: 'Líquidos',  nome: 'Gloss Orquídea Silver',ean:'7 898697 028109' },
+  { cat: 'Líquidos',  nome: 'Gloss Lírio Crystal', ean: '7 898697 028048' },
+  { cat: 'Líquidos',  nome: 'Gloss Magnólia Bronze',ean:'7 898697 028062' },
+  { cat: 'Líquidos',  nome: 'Gloss Pêonia Glow',   ean: '7 898697 028055' },
+  { cat: 'Líquidos',  nome: 'Corretivo C MK 01',   ean: '7 898697 028390' },
+  { cat: 'Líquidos',  nome: 'Corretivo C MK 02',   ean: '7 898697 028369' },
+  { cat: 'Líquidos',  nome: 'Corretivo C MK 03',   ean: '7 898697 028383' },
+  { cat: 'Líquidos',  nome: 'Corretivo C MK 04',   ean: '7 898697 028376' },
+  { cat: 'Líquidos',  nome: 'Corretivo C MK 05',   ean: '7 898687 028406' },
+  { cat: 'Líquidos',  nome: 'Base MK 01',           ean: '7 898715 200876' },
+  { cat: 'Líquidos',  nome: 'Base MK 02',           ean: '7 898715 200883' },
+  { cat: 'Líquidos',  nome: 'Base MK 03',           ean: '7 898715 200890' },
+  { cat: 'Líquidos',  nome: 'Base MK 04',           ean: '7 898715 200906' },
+  { cat: 'Líquidos',  nome: 'Base MK 05',           ean: '7 898715 200913' },
+  { cat: 'Líquidos',  nome: 'Base MK 06',           ean: '7 898715 200920' },
+  { cat: 'Líquidos',  nome: 'Base MK 07',           ean: '7 898715 200937' },
+  { cat: 'Líquidos',  nome: 'Base MK 08',           ean: '7 898715 200944' },
+];
+
+const CAT_BADGE = {
+  'Compactos': 'badge-compact',
+  'Soltos':    'badge-solto',
+  'Líquidos':  'badge-liquido',
+};
+
+// State
+let state = load();
+let activeFilter = 'all'; // 'all' or inf index (0-based)
+
+function defaultState() {
+  const names = Array.from({length: INFLUENCIADORAS_COUNT}, (_, i) => `Inf. ${i+1}`);
+  const checks = {}; // checks[prodIdx][infIdx] = bool
+  PRODUTOS.forEach((_, pi) => {
+    checks[pi] = {};
+    for (let ii = 0; ii < INFLUENCIADORAS_COUNT; ii++) checks[pi][ii] = false;
+  });
+  return { names, checks };
+}
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      // Merge in case products changed
+      const def = defaultState();
+      def.names = parsed.names || def.names;
+      PRODUTOS.forEach((_, pi) => {
+        if (parsed.checks && parsed.checks[pi]) {
+          Object.assign(def.checks[pi], parsed.checks[pi]);
+        }
+      });
+      return def;
+    }
+  } catch(e) {}
+  return defaultState();
+}
+
+function save() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function cellId(pi, ii) { return `c_${pi}_${ii}`; }
+
+function toggle(pi, ii) {
+  state.checks[pi][ii] = !state.checks[pi][ii];
+  save();
+  refreshCell(pi, ii);
+  updateStats();
+}
+
+function refreshCell(pi, ii) {
+  const el = document.getElementById(cellId(pi, ii));
+  if (!el) return;
+  const checked = state.checks[pi][ii];
+  el.className = 'check-box' + (checked ? ' checked' : '');
+  el.textContent = checked ? '✓' : '';
+  // update row total
+  const rowTotal = PRODUTOS.map((_, i) => state.checks[pi][i]).filter(Boolean).length;
+  const rt = document.getElementById(`rt_${pi}`);
+  if (rt) {
+    rt.textContent = rowTotal > 0 ? rowTotal : '—';
+    rt.className = 'td-total' + (rowTotal > 0 ? ' has-checks' : '');
+  }
+  // update col total
+  const colTotal = PRODUTOS.map((_, pj) => state.checks[pj][ii]).filter(Boolean).length;
+  const ct = document.getElementById(`ct_${ii}`);
+  if (ct) {
+    ct.textContent = colTotal > 0 ? colTotal : '—';
+    ct.className = 'td-total' + (colTotal > 0 ? ' has-checks' : '');
+  }
+  // progress
+  const prog = document.getElementById(`prog_${ii}`);
+  if (prog) prog.style.width = Math.round(colTotal / PRODUTOS.length * 100) + '%';
+}
+
+function updateStats() {
+  let total = 0;
+  let kits = new Set();
+  PRODUTOS.forEach((_, pi) => {
+    for (let ii = 0; ii < INFLUENCIADORAS_COUNT; ii++) {
+      if (state.checks[pi][ii]) { total++; kits.add(ii); }
+    }
+  });
+  document.getElementById('stat-marcacoes').textContent = total;
+  document.getElementById('stat-kits').textContent = kits.size;
+}
+
+function getVisibleInfs() {
+  if (activeFilter === 'all') return Array.from({length: INFLUENCIADORAS_COUNT}, (_, i) => i);
+  return [parseInt(activeFilter)];
+}
+
+function marcarTodasAtual() {
+  const infs = getVisibleInfs();
+  PRODUTOS.forEach((_, pi) => {
+    infs.forEach(ii => { state.checks[pi][ii] = true; });
+  });
+  save();
+  renderTable();
+  updateStats();
+}
+
+function resetarAtual() {
+  const infs = getVisibleInfs();
+  PRODUTOS.forEach((_, pi) => {
+    infs.forEach(ii => { state.checks[pi][ii] = false; });
+  });
+  save();
+  renderTable();
+  updateStats();
+}
+
+function setFilter(val) {
+  activeFilter = val;
+  document.querySelectorAll('.inf-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.inf == val);
+  });
+  renderTable();
+}
+
+function buildTabs() {
+  const tabs = document.getElementById('inf-tabs');
+  tabs.innerHTML = '<button class="inf-tab active" data-inf="all" onclick="setFilter(\'all\')">Todas</button>';
+  for (let i = 0; i < INFLUENCIADORAS_COUNT; i++) {
+    const b = document.createElement('button');
+    b.className = 'inf-tab';
+    b.dataset.inf = i;
+    b.textContent = state.names[i];
+    b.onclick = () => setFilter(String(i));
+    tabs.appendChild(b);
+  }
+}
+
+function renderTable() {
+  const infs = getVisibleInfs();
+  const main = document.getElementById('main-content');
+  const cats = [...new Set(PRODUTOS.map(p => p.cat))];
+
+  let html = `<table>`;
+
+  // Header
+  html += `<thead><tr>
+    <th class="th-produto">Produto</th>
+    <th class="th-ean">EAN</th>`;
+
+  infs.forEach(ii => {
+    html += `<th class="th-inf">
+      <input class="inf-edit" id="name_${ii}" value="${escHtml(state.names[ii])}"
+        onblur="renameInf(${ii}, this.value)"
+        onkeydown="if(event.key==='Enter')this.blur()"
+        title="Clique para renomear">
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="prog_${ii}" style="width:0%"></div>
+      </div>
+    </th>`;
+  });
+
+  html += `<th style="min-width:40px;width:40px;font-size:9px;">Total<br>infs</th></tr>`;
+
+  // Col totals row
+  html += `<tr class="kit-summary-row"><td colspan="2" style="text-align:right;padding-right:14px;">Itens no kit →</td>`;
+  infs.forEach(ii => {
+    const col = PRODUTOS.filter((_, pi) => state.checks[pi][ii]).length;
+    html += `<td class="td-total ${col>0?'has-checks':''}" id="ct_${ii}">${col>0?col:'—'}</td>`;
+  });
+  html += `<td></td></tr></thead><tbody>`;
+
+  cats.forEach(cat => {
+    const badge = CAT_BADGE[cat];
+    html += `<tr><td colspan="${infs.length + 3}" style="padding:14px 10px 6px;background:var(--bg);">
+      <div class="section-title" style="margin:0">
+        <span class="section-badge ${badge}">${cat}</span>
+        <span class="section-line"></span>
+      </div></td></tr>`;
+
+    PRODUTOS.forEach((p, pi) => {
+      if (p.cat !== cat) return;
+      const rowChecked = infs.filter(ii => state.checks[pi][ii]).length;
+      html += `<tr>
+        <td class="td-produto">${escHtml(p.nome)}</td>
+        <td class="td-ean">${escHtml(p.ean)}</td>`;
+      infs.forEach(ii => {
+        const checked = state.checks[pi][ii];
+        html += `<td class="td-check">
+          <button class="check-box${checked?' checked':''}" id="${cellId(pi,ii)}"
+            onclick="toggle(${pi},${ii})">${checked?'✓':''}</button>
+        </td>`;
+      });
+      const allInfsChecked = PRODUTOS.map((_, i) => state.checks[pi][i]).filter(Boolean).length;
+      html += `<td class="td-total ${allInfsChecked>0?'has-checks':''}" id="rt_${pi}">${allInfsChecked>0?allInfsChecked:'—'}</td>`;
+      html += `</tr>`;
+    });
+  });
+
+  html += `</tbody></table>`;
+  main.innerHTML = html;
+
+  // Update progress bars
+  infs.forEach(ii => {
+    const col = PRODUTOS.filter((_, pi) => state.checks[pi][ii]).length;
+    const prog = document.getElementById(`prog_${ii}`);
+    if (prog) prog.style.width = Math.round(col / PRODUTOS.length * 100) + '%';
+  });
+}
+
+function renameInf(ii, val) {
+  const name = val.trim() || `Inf. ${ii+1}`;
+  state.names[ii] = name;
+  save();
+  // update tab label
+  const tabs = document.getElementById('inf-tabs');
+  const tab = tabs.querySelector(`[data-inf="${ii}"]`);
+  if (tab) tab.textContent = name;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Init
+buildTabs();
+renderTable();
+updateStats();
+</script>
+</body>
+</html>
